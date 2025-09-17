@@ -1,0 +1,13 @@
+dimensions:
+  - id: dim.date
+    type: "time"
+    description: "날짜(일/주/월 버킷 시작일)"
+  - id: dim.channel
+    type: "categorical"
+    description: "채널"
+  - id: dim.device
+    type: "categorical"
+    description: "디바이스"
+  - id: dim.region
+    type: "categorical"
+    description: "지역"

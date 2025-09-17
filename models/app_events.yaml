@@ -1,0 +1,8 @@
+id: "model.app_events"
+description: "앱 사용자 행동 로그 테이블"
+storage:
+  warehouse: "athena"
+  database: "prod"
+  table: "raw.app_events"
+contacts:
+  owners: ["slack:#data-platform"]

@@ -1,0 +1,21 @@
+id: "metric.active_users"
+description: "활성 사용자(기간 기준 distinct)"
+contacts:
+  owners: ["slack:#digital-analytics"]
+time_grains: ["day","week","month"]     # 지원 그레인
+entity_grain: ["user_id"]
+rollup_dimensions: ["dim.date","dim.channel","dim.device","dim.region"]
+depends_on_models: ["model.app_events"]
+tags: ["active_users","dau","wau","mau"]
+parameters:
+  - name: "as_of_date"
+    type: "date"
+    required: true
+  - name: "time_grain"
+    type: "string"
+    required: true
+    allowed_values: ["day","week","month"]
+  - name: "channel"
+    type: "string"
+    required: false
+sql: "active_users.sql"

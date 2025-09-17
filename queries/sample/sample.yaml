@@ -1,0 +1,21 @@
+id: "query.top_channels"
+description: "지정된 기간 동안 이벤트 수 기준 상위 채널 조회"
+contacts:
+  owners: ["slack:#digital-analytics"]
+depends_on_models:
+  - "model.app_events"
+tags: ["channel", "events", "topN"]
+parameters:
+  - name: "start_date"
+    type: "date"
+    format: "YYYY-MM-DD"
+    required: true
+  - name: "end_date"
+    type: "date"
+    format: "YYYY-MM-DD"
+    required: true
+  - name: "limit"
+    type: "number"
+    required: false
+    default: 5
+sql: "query.sql"
