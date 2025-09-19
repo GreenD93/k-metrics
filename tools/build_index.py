@@ -16,11 +16,14 @@ def load_items(base_dir: str, kind: str):
     for y in (ROOT / base_dir).rglob("*.yaml"):
         with open(y, encoding="utf-8") as f:
             obj = yaml.safe_load(f) or {}
-        # 공통 정규화
+
         sql_rel = obj.get("sql")
         sql_path = (y.parent / sql_rel) if sql_rel else None
         title = obj.get("title") or obj.get("name") or y.stem
         tags = obj.get("tags") or obj.get("keywords") or []
+        # 👇 새로 인덱싱할 필드
+        calculation = obj.get("calculation") or ""
+        notes = obj.get("notes") or ""
 
         item_full = {
             "id": obj.get("id"),
@@ -36,26 +39,34 @@ def load_items(base_dir: str, kind: str):
             "parameters": obj.get("parameters"),
             "sql": sql_rel,
             "versions": obj.get("versions"),
+            # 👇 추가
+            "calculation": calculation,
+            "notes": notes,
             "_source": str(y.relative_to(ROOT)),
             "_sql_path": str(sql_path.relative_to(ROOT)) if sql_path else None,
             "_sql_sha256": sha256_file(sql_path) if sql_path else None,
         }
 
-        # lite 뷰
+        # LITE용 통합 텍스트(검색/임베딩에 유용)
         text = " ".join(filter(None, [
             item_full["id"] or "",
             str(title),
             item_full["description"] or "",
+            calculation,
+            notes.replace("\n", " "),  # 줄바꿈 제거
             " ".join(tags) if tags else "",
             kind
         ]))
+
         item_lite = {
             "id": item_full["id"],
             "kind": kind,
             "title": str(title),
             "description": item_full["description"] or "",
+            "calculation": calculation,                 # 👈 노출
+            "notes": notes,                  # 👈 짧은 키로 노출
             "tags": tags,
-            "text": " ".join(text.split()),            # 공백 정리
+            "text": " ".join(text.split()),
             "path_yaml": item_full["_source"],
             "path_sql": item_full["_sql_path"],
         }
@@ -71,11 +82,9 @@ def main():
     outdir.mkdir(exist_ok=True)
 
     all_full, all_lite = [], []
-
     for base_dir, kind in [("metrics", "metric"), ("queries", "query")]:
         for full, lite in load_items(base_dir, kind):
-            # id 없는 항목은 스킵(최소 보정)
-            if not full["id"]:
+            if not full["id"]:  # id 없으면 스킵
                 continue
             all_full.append(full)
             all_lite.append(lite)

@@ -1,12 +1,14 @@
 id: "metric.active_users"
-description: "활성 사용자(기간 기준 distinct)"
+description: "기간 단위별 활성 사용자 수 (distinct user_id)"
 contacts:
   owners: ["slack:#digital-analytics"]
-time_grains: ["day","week","month"]     # 지원 그레인
+
+time_grains: ["day","week","month"]
 entity_grain: ["user_id"]
 rollup_dimensions: ["dim.date","dim.channel","dim.device","dim.region"]
 depends_on_models: ["model.app_events"]
 tags: ["active_users","dau","wau","mau"]
+
 parameters:
   - name: "as_of_date"
     type: "date"
@@ -18,4 +20,13 @@ parameters:
   - name: "channel"
     type: "string"
     required: false
+
+# 👇 계산식과 추출 특이사항을 별도 필드에 분리
+calculation: "COUNT(DISTINCT user_id)"
+
+notes: |
+  - event_ts 기준으로 계산
+  - channel 파라미터로 필터링 가능
+  - 주/월은 date_trunc(@as_of_date, time_grain) 기준 버킷팅
+
 sql: "active_users.sql"
