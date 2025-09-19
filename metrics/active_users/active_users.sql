@@ -1,12 +1,10 @@
--- params:
---   as_of_date: "YYYY-MM-DD"
---   time_grain: "day"|"week"|"month"
---   channel: optional
+-- active_users.sql (Athena/Presto, 패턴 B 수정판)
+-- params: as_of_date, time_grain, channel(optional)
 
 {% set WHERE_BY_GRAIN = {
-  'day':   "date(event_ts) = date('{{ as_of_date }}')",
-  'week':  "date_trunc('week',  event_ts) = date_trunc('week',  from_iso8601_timestamp('{{ as_of_date }}'))",
-  'month': "date_trunc('month', event_ts) = date_trunc('month', from_iso8601_timestamp('{{ as_of_date }}'))"
+  'day':   "date(event_ts) = date(" ~ (as_of_date | sql_str) ~ ")",
+  'week':  "date_trunc('week',  event_ts) = date_trunc('week',  from_iso8601_timestamp(" ~ (as_of_date | sql_str) ~ "))",
+  'month': "date_trunc('month', event_ts) = date_trunc('month', from_iso8601_timestamp(" ~ (as_of_date | sql_str) ~ "))"
 } %}
 
 WITH src AS (
